@@ -6,7 +6,7 @@ import {
   RefreshCcw, LockKeyhole, GraduationCap, Lightbulb, Trophy, Flame, 
   Target, Zap, Search, Award, Loader2, Trash2, TrendingUp, Settings, Plus, Save, Activity,
   History, Edit3, Bell, Check, List, Clock, XCircle, HelpCircle, Info, Gift, Image as ImageIcon, Camera, Palette, FileText, Send, Lock, Crown, Gem, RotateCcw, CalendarDays, MapPin, Globe, Scroll, Heart, Sliders,
-  Timer, Play, Pause // YENİ EKLENEN İKONLAR
+  Timer, Play, Pause 
 } from 'lucide-react';
 
 import { initializeApp } from 'firebase/app';
@@ -92,26 +92,33 @@ const UiverseStyles = () => (
   `}</style>
 );
 
-// --- 1. FIREBASE INIT ---
-const firebaseConfig = {
-  // YENİ GÜVENLİ API KEY BURAYA
-  apiKey: "AIzaSyAymTlaA8CgqpfOC1vhs-bO6240ZlBGlrQ", 
-  authDomain: "kamp-takip-sistemi.firebaseapp.com",
-  projectId: "kamp-takip-sistemi",
-  storageBucket: "kamp-takip-sistemi.firebasestorage.app",
-  messagingSenderId: "339295588440",
-  appId: "1:339295588440:web:3400318781869a00afba2d"
-};
+let firebaseConfig;
+if (typeof __firebase_config !== 'undefined') {
+  firebaseConfig = JSON.parse(__firebase_config);
+} else {
+  // AŞAĞIDAKİ BİLGİLERİ FIREBASE PROJE AYARLARINDAN ALDIKLARINLA DEĞİŞTİR:
+  firebaseConfig = {
+    apiKey: "BURAYA_GERÇEK_API_KEY_GELECEK", 
+    authDomain: "kamp-takip-sistemi.firebaseapp.com",
+    projectId: "kamp-takip-sistemi",
+    storageBucket: "kamp-takip-sistemi.firebasestorage.app",
+    messagingSenderId: "339295588440",
+    appId: "BURAYA_GERÇEK_APP_ID_GELECEK"
+  };
+}
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// --- 2. AYARLAR VE SABİTLER ---
 const APP_ID = "kamp-takip-yonetici-v3"; 
-const LGS_DATE_2026 = new Date('2026-06-07T09:30:00');
 
-// --- LGS MÜFREDAT TAKVİMİ (REFERANS HAVUZU) ---
+const ADVICE_POOL = {
+    math: ["Matematikte biraz daha pratiğe ihtiyacın var, pes etme!", "İşlem hatalarına dikkat et, soruları yavaş oku.", "Yapamadığın matematik sorularını mutlaka öğretmenine sor."],
+    turkish: ["Paragraf sorularında önce soruyu, sonra metni oku.", "Dil bilgisi kurallarını tekrar etmen faydalı olabilir.", "Kitap okumak Türkçe netlerini doğrudan artırır!"],
+    general: ["Harika gidiyorsun, aynen devam!", "Düzenli çalışmak başarının anahtarıdır.", "Bugün çok iyiydin, yarın daha da iyi olacaksın!", "Mola vermeyi unutma, zihnini dinlendir."]
+};
+
 const LGS_CURRICULUM_CALENDAR = [
     { id: 0, title: '1. Dönem Başlangıç', mat: 'Çarpanlar ve Katlar', fen: 'Mevsimler ve İklim', tr: 'Fiilimsiler', ink: 'Bir Kahraman Doğuyor', din: 'Kader İnancı', ing: 'Friendship' },
     { id: 1, title: '1. Dönem - Ekim Ortası', mat: 'Üslü İfadeler', fen: 'DNA ve Genetik Kod', tr: 'Cümlenin Ögeleri', ink: 'Milli Uyanış', din: 'Zekat ve Sadaka', ing: 'Teen Life' },
@@ -144,7 +151,7 @@ const DEFAULT_CURRICULUM = {
   "5": [{ id: 'mat', target: 30 }, { id: 'tr', target: 30 }, { id: 'fen', target: 20 }, { id: 'sos', target: 20 }, { id: 'serbestCalisma', target: 30 }],
   "6": [{ id: 'mat', target: 40 }, { id: 'tr', target: 40 }, { id: 'fen', target: 30 }, { id: 'serbestCalisma', target: 30 }],
   "7": [{ id: 'mat', target: 50 }, { id: 'tr', target: 50 }, { id: 'fen', target: 30 }, { id: 'serbestCalisma', target: 30 }],
-  "8": [{ id: 'mat', target: 60 }, { id: 'tr', target: 60 }, { id: 'fen', target: 40 }, { id: 'inkilap', target: 25 }, { id: 'ing', target: 20 }, { id: 'din', target: 15 }, { id: 'serbestCalisma', target: 30 }]
+  "8": [{ id: 'mat', target: 60 }, { id: 'tr', target: 60 }, { id: 'fen', target: 40 }, { id: 'inkilap', target: 25 }, { id: 'ing', target: 20 }, { id: 'din', target: 15 }, { id: 'kelime', target: 20 }, { id: 'serbestCalisma', target: 30 }]
 };
 
 const SUBJECT_METADATA = {
@@ -157,13 +164,13 @@ const SUBJECT_METADATA = {
   ing: { label: "İngilizce", icon: Globe, color: "purple", type: "question" },
   din: { label: "Din Kültürü", icon: Heart, color: "teal", type: "question" },
   kitap: { label: "Kitap Okuma", icon: BookOpen, color: "pink", type: "duration" },
+  kelime: { label: "Kelime Ezberleme", icon: FileText, color: "fuchsia", type: "duration" },
   spor: { label: "Spor/Egzersiz", icon: Trophy, color: "cyan", type: "duration" },
   kodlama: { label: "Kodlama", icon: Zap, color: "violet", type: "duration" },
   deneme: { label: "Deneme Sınavı", icon: Target, color: "indigo", type: "question" },
-  serbestCalisma: { label: "Serbest Çalışma", icon: List, color: "indigo", type: "selection", options: ["Kitap Okuma 📚", "Matematik Konu 🧮", "Fen Konu 🧪", "Türkçe Konu 📖", "Sosyal/İnkılap Konu 🌍", "İngilizce Konu 🗣️", "Din Kültürü Konu 🕌"] }
+  serbestCalisma: { label: "Serbest Çalışma", icon: List, color: "indigo", type: "selection", options: ["Kitap Okuma 📚", "Kelime Ezberleme 📝", "Matematik Konu 🧮", "Fen Konu 🧪", "Türkçe Konu 📖", "Sosyal/İnkılap Konu 🌍", "İngilizce Konu 🗣️", "Din Kültürü Konu 🕌"] }
 };
 
-// --- YARDIMCI FONKSİYONLAR ---
 const normalizeString = (str) => {
     const map = { 'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u', 'Ç': 'C', 'Ğ': 'G', 'İ': 'I', 'Ö': 'O', 'Ş': 'S', 'Ü': 'U' };
     return str.replace(/[çğıöşüÇĞİÖŞÜ]/g, match => map[match] || match).trim().toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -227,7 +234,7 @@ const compressProfilePic = (file) => {
             img.src = event.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const SIZE = 200; // Profil fotoğrafları küçük ve hafif olmalıdır
+                const SIZE = 200; 
                 canvas.width = SIZE;
                 canvas.height = SIZE;
                 const ctx = canvas.getContext('2d');
@@ -488,8 +495,6 @@ const generateReportCard = (student, curriculum, customMessage = null) => {
     link.click();
 };
 
-// --- BİLEŞENLER ---
-
 const WaveInput = ({ value, onChange, label, icon: Icon, type = "text", rightElement }) => {
     return (
         <div className={`wave-group ${Icon ? 'has-icon' : ''}`}>
@@ -519,7 +524,6 @@ const NavButton = ({ icon: Icon, label, isActive, onClick }) => (
     </button>
 );
 
-// YENİ EKLENTİ: ODAK MODU (POMODORO SAYACI)
 function PomodoroView({ showDialog }) {
     const [timeLeft, setTimeLeft] = useState(25 * 60);
     const [isRunning, setIsRunning] = useState(false);
@@ -538,7 +542,7 @@ function PomodoroView({ showDialog }) {
             else { setMode('work'); setTimeLeft(25 * 60); }
         }
         return () => clearInterval(interval);
-    }, [isRunning, timeLeft, mode]);
+    }, [isRunning, timeLeft, mode, showDialog]);
 
     const toggleTimer = () => setIsRunning(!isRunning);
     const resetTimer = () => { setIsRunning(false); setTimeLeft(mode === 'work' ? 25 * 60 : 5 * 60); };
@@ -585,12 +589,79 @@ function PomodoroView({ showDialog }) {
     )
 }
 
+function CalendarView({ data, onDayClick, daysArray }) {
+    return (
+        <div className="bg-white rounded-3xl shadow-lg p-6 border border-slate-100 mb-6">
+            <h3 className="font-bold text-xl mb-4 flex items-center text-slate-800"><Calendar className="w-6 h-6 mr-2 text-indigo-600"/> Kamp Takvimi</h3>
+            <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+                {daysArray.map(day => {
+                    const isCompleted = data?.days?.[day];
+                    return (
+                        <button key={day} onClick={() => onDayClick(day)} className={`aspect-square flex flex-col items-center justify-center rounded-2xl text-sm font-bold transition transform active:scale-95 shadow-sm ${isCompleted ? 'bg-green-100 text-green-700 border-2 border-green-300' : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300'}`}>
+                            <span className="text-lg">{day}</span>
+                            <span className="text-[10px] uppercase">{isCompleted ? 'Bitti' : 'Gün'}</span>
+                        </button>
+                    )
+                })}
+            </div>
+        </div>
+    )
+}
+
+function LeaderboardView({ students, currentStudentId, currentGrade }) {
+    const sorted = [...students]
+        .filter(s => s.grade === currentGrade)
+        .sort((a, b) => Object.keys(b.days || {}).length - Object.keys(a.days || {}).length);
+        
+    return (
+        <div className="bg-white rounded-3xl shadow-lg p-6 border border-slate-100 mb-6">
+            <h3 className="font-bold text-xl mb-4 flex items-center text-slate-800"><Crown className="w-6 h-6 mr-2 text-amber-500"/> Sınıf Liderlik Tablosu</h3>
+            <div className="space-y-3">
+                {sorted.length === 0 && <p className="text-slate-400 text-sm">Henüz bu sınıfta kimse yok.</p>}
+                {sorted.map((s, idx) => (
+                    <div key={s.id} className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${s.id === currentStudentId ? 'bg-indigo-50 border-indigo-300 shadow-md transform scale-[1.02]' : 'bg-slate-50 border-slate-100'}`}>
+                        <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shadow-inner ${idx === 0 ? 'bg-amber-100 text-amber-700 text-lg border-2 border-amber-300' : idx === 1 ? 'bg-slate-200 text-slate-700 text-lg border-2 border-slate-300' : idx === 2 ? 'bg-orange-100 text-orange-700 text-lg border-2 border-orange-300' : 'bg-white text-slate-500 border border-slate-200'}`}>{idx + 1}</div>
+                            <span className={`font-bold ${s.id === currentStudentId ? 'text-indigo-700' : 'text-slate-700'}`}>{s.name}</span>
+                        </div>
+                        <span className="font-black text-lg text-indigo-600 bg-indigo-100 px-3 py-1 rounded-xl">{Object.keys(s.days || {}).length} Gün</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
+
+function BadgesView({ data, grade, totalDays }) {
+    const earnedBadges = BADGE_DEFINITIONS.filter(b => b.check(data?.days || {}));
+    return (
+        <div className="bg-white rounded-3xl shadow-lg p-6 border border-slate-100 mb-6">
+            <div className="flex items-center justify-between mb-6">
+                <h3 className="font-bold text-xl flex items-center text-slate-800"><Award className="w-6 h-6 mr-2 text-purple-600"/> Kazanılan Rozetler</h3>
+                <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold">{earnedBadges.length} / {BADGE_DEFINITIONS.length}</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {BADGE_DEFINITIONS.map(badge => {
+                    const earned = earnedBadges.find(b => b.id === badge.id);
+                    return (
+                        <div key={badge.id} className={`flex flex-col items-center p-4 rounded-2xl border text-center transition-all ${earned ? (badge.tier === 'altin' ? 'bg-amber-50 border-amber-200 shadow-md' : badge.tier === 'gumus' ? 'bg-slate-100 border-slate-300 shadow-md' : 'bg-orange-50 border-orange-200 shadow-md') : 'bg-slate-50 border-slate-100 opacity-60 grayscale hover:grayscale-0'}`}>
+                            <badge.icon className={`w-10 h-10 mb-3 drop-shadow-sm ${earned ? (badge.tier === 'altin' ? 'text-amber-500' : badge.tier === 'gumus' ? 'text-slate-500' : 'text-orange-500') : 'text-slate-400'}`} />
+                            <span className="font-bold text-xs leading-tight text-slate-800 mb-1">{badge.title}</span>
+                            <span className="text-[10px] text-slate-500">{badge.desc}</span>
+                        </div>
+                    )
+                })}
+            </div>
+        </div>
+    )
+}
+
 function LGSCountdown({ grade }) { 
-    const [timeLeft, setTimeLeft] = useState({}); 
+    const [timeLeft, setTimeLeft] = useState({ gün: 0, saat: 0, dk: 0, sn: 0 }); 
     useEffect(() => { 
         const timer = setInterval(() => { 
             const now = new Date();
-            const targetDate = LGS_DATE_2026; 
+            const targetDate = new Date('2027-06-06T09:30:00'); 
             const diff = targetDate - now; 
             if (diff > 0) { 
                 setTimeLeft({ gün: Math.floor(diff/(1000*60*60*24)), saat: Math.floor((diff/(1000*60*60))%24), dk: Math.floor((diff/1000/60)%60), sn: Math.floor((diff/1000)%60) });
@@ -600,27 +671,28 @@ function LGSCountdown({ grade }) {
     }, [grade]); 
     
     return (
-        <div className="bg-slate-900 rounded-2xl p-5 mb-6 shadow-xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full blur-[60px] opacity-20 group-hover:opacity-30 transition"></div>
-            <div className="relative z-10 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-500/30">
-                        <Clock className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                        <h4 className="text-white font-bold text-lg leading-none">LGS 2026</h4>
-                        <span className="text-indigo-300 text-xs font-medium">Büyük Sınava Kalan</span>
-                    </div>
+        <div className="bg-[#0f172a] rounded-3xl p-5 mb-6 shadow-xl relative overflow-hidden flex items-center justify-between border border-slate-800">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full blur-[70px] opacity-20 transition"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500 rounded-full blur-[60px] opacity-10"></div>
+            
+            <div className="relative z-10 flex items-center gap-4">
+                <div className="bg-gradient-to-br from-indigo-500 to-violet-600 p-3.5 rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.4)]">
+                    <Clock className="w-7 h-7 text-white" />
                 </div>
-                <div className="flex gap-2 text-center">
-                    <div className="bg-slate-800 p-2 rounded-lg min-w-[50px] border border-slate-700">
-                        <div className="text-xl font-bold text-white leading-none">{timeLeft.gün || 0}</div>
-                        <div className="text-[10px] text-slate-400 mt-1 uppercase">Gün</div>
-                    </div>
-                    <div className="bg-slate-800 p-2 rounded-lg min-w-[50px] border border-slate-700 hidden sm:block">
-                        <div className="text-xl font-bold text-white leading-none">{timeLeft.saat || 0}</div>
-                        <div className="text-[10px] text-slate-400 mt-1 uppercase">Saat</div>
-                    </div>
+                <div>
+                    <h4 className="text-white font-extrabold text-xl tracking-wide">LGS 2027</h4>
+                    <span className="text-indigo-300 text-xs font-medium tracking-wider uppercase">Büyük Sınava Kalan</span>
+                </div>
+            </div>
+            
+            <div className="relative z-10 flex gap-2 sm:gap-3">
+                <div className="bg-[#1e293b] px-4 py-3 rounded-2xl border border-slate-700 shadow-inner flex flex-col items-center justify-center min-w-[64px]">
+                    <div className="text-2xl font-black text-white leading-none mb-1">{timeLeft.gün || 0}</div>
+                    <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Gün</div>
+                </div>
+                <div className="bg-[#1e293b] px-4 py-3 rounded-2xl border border-slate-700 shadow-inner flex flex-col items-center justify-center min-w-[64px]">
+                    <div className="text-2xl font-black text-white leading-none mb-1">{timeLeft.saat || 0}</div>
+                    <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Saat</div>
                 </div>
             </div>
         </div>
@@ -740,7 +812,7 @@ function StudentProgramEditorModal({ student, globalCurriculum, totalDays, onClo
                 <div className="overflow-y-auto p-4 flex-1">
                     <div className="bg-white p-3 rounded-xl shadow-sm mb-4 border border-slate-200"><label className="text-xs font-bold text-slate-500 uppercase flex items-center"><CalendarDays className="w-3 h-3 mr-1"/> Gün Seç</label><select value={selectedDay} onChange={e => setSelectedDay(e.target.value)} className="w-full mt-2 p-2 border border-slate-200 rounded-lg text-sm bg-slate-50 font-bold outline-none">{Array.from({length: totalDays}, (_, i) => i + 1).map(d => (<option key={d} value={d}>{d}. Gün {student.customProgram?.[d] ? '🌟 (Özel)' : ''}</option>))}</select></div>
                     <div className="bg-white p-4 rounded-xl shadow-sm mb-4 border border-slate-200"><h3 className="text-xs font-bold text-slate-500 uppercase mb-1">Bu Güne Görev Ekle</h3><div className="flex flex-col gap-3"><div className="flex gap-2"><select className="flex-1 p-2 border rounded-lg text-sm bg-slate-50 outline-none" value={newItem.id} onChange={e => setNewItem({...newItem, id: e.target.value})}>{Object.keys(SUBJECT_METADATA).map(key => (<option key={key} value={key}>{SUBJECT_METADATA[key].label}</option>))}</select><input type="number" className="w-20 p-2 border rounded-lg text-sm outline-none" placeholder="Hedef" value={newItem.target} onChange={e => setNewItem({...newItem, target: parseInt(e.target.value)})} /></div><WaveInput value={newItem.customLabel} onChange={e => setNewItem({...newItem, customLabel: e.target.value})} label="Özel Görev Adı (İsteğe Bağlı)" icon={Edit3} /><button onClick={handleAddItem} className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-bold text-xs flex items-center justify-center transition"><Plus className="w-4 h-4 mr-1"/> Listeye Ekle</button></div></div>
-                    <div className="space-y-2 mb-4"><h3 className="text-xs font-bold text-slate-500 uppercase">{selectedDay}. Gün Görev Listesi</h3>{dayProgram.length === 0 && <div className="text-center text-xs text-slate-400 p-4 border rounded-xl border-dashed">Liste boş.</div>}{dayProgram.map((item, idx) => { const meta = getSubjectInfo(item); return ( <div key={item.id + idx} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center shadow-sm"><div className="flex items-center gap-3">{meta.icon && <div className={`p-2 bg-${meta.color}-50 rounded-lg`}><meta.icon className={`w-4 h-4 text-${meta.color}-600`}/></div>}<div><div className="font-bold text-slate-700 text-sm">{meta.label}</div><div className="text-[10px] text-slate-500">Hedef: {item.target} {meta.type === 'question' ? 'soru' : 'dk'}</div></div></div><button onClick={() => handleRemoveItem(idx)} className="text-red-400 hover:text-red-600 p-2 bg-red-50 rounded-lg transition"><Trash2 className="w-4 h-4"/></button></div> ) })}</div>
+                    <div className="space-y-2 mb-4"><h3 className="text-xs font-bold text-slate-500 uppercase">{selectedDay}. Gün Görev Listesi</h3>{dayProgram.length === 0 && <div className="text-center text-xs text-slate-400 p-4 border rounded-xl border-dashed">Liste boş.</div>}{dayProgram.map((item, idx) => { const meta = getSubjectInfo(item); return ( <div key={item.id + idx} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center shadow-sm"><div className="flex items-center gap-3">{meta.icon && <div className={`p-2 bg-${meta.color}-50 rounded-lg`}><meta.icon className={`w-4 h-4 text-${meta.color}-600`}/></div>}<div><div className="font-bold text-slate-700 text-sm">{meta.label}</div><div className="text-[10px] text-slate-500">Hedef: {item.target} {meta.type === 'question' ? 'soru' : item.id === 'kelime' ? 'kelime' : 'dk'}</div></div></div><button onClick={() => handleRemoveItem(idx)} className="text-red-400 hover:text-red-600 p-2 bg-red-50 rounded-lg transition"><Trash2 className="w-4 h-4"/></button></div> ) })}</div>
                 </div>
                 <div className="p-4 bg-white border-t border-slate-200 space-y-2"><button onClick={handleSaveDay} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold flex items-center justify-center shadow-lg transition"><Save className="w-5 h-5 mr-2"/> Bu Günü Öğrenciye Kaydet</button>{student.customProgram?.[selectedDay] && (<button onClick={handleClearDay} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 py-2 rounded-xl text-xs font-bold transition">Özel Programı Temizle (Sınıf Şablonuna Dön)</button>)}</div>
             </div>
@@ -772,7 +844,7 @@ function ProgramEditorModal({ curriculum, onClose, showDialog }) {
                     <button onClick={handleAddItem} className="w-full bg-green-500 text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center"><Plus className="w-4 h-4 mr-2"/> Listeye Ekle</button>
                 </div>
             </div>
-            <div className="space-y-2 mb-20">{safeArray(list).map((item, idx) => { const meta = getSubjectInfo(item); return ( <div key={item.id + idx} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center"><div className="flex items-center gap-3">{meta.icon && <div className={`p-2 bg-${meta.color}-50 rounded-lg`}><meta.icon className={`w-5 h-5 text-${meta.color}-600`}/></div>}<div><div className="font-bold text-slate-700 text-sm">{meta.label}</div><div className="text-xs text-slate-500">Hedef: {item.target} {meta.type === 'question' ? 'soru' : 'dk'}</div></div></div><button onClick={() => handleRemoveItem(idx)} className="text-red-400 hover:text-red-600 p-2"><Trash2 className="w-4 h-4"/></button></div> ) })}</div>
+            <div className="space-y-2 mb-20">{safeArray(list).map((item, idx) => { const meta = getSubjectInfo(item); return ( <div key={item.id + idx} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center"><div className="flex items-center gap-3">{meta.icon && <div className={`p-2 bg-${meta.color}-50 rounded-lg`}><meta.icon className={`w-5 h-5 text-${meta.color}-600`}/></div>}<div><div className="font-bold text-slate-700 text-sm">{meta.label}</div><div className="text-xs text-slate-500">Hedef: {item.target} {meta.type === 'question' ? 'soru' : item.id === 'kelime' ? 'kelime' : 'dk'}</div></div></div><button onClick={() => handleRemoveItem(idx)} className="text-red-400 hover:text-red-600 p-2"><Trash2 className="w-4 h-4"/></button></div> ) })}</div>
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t flex gap-2"><button onClick={handleSave} className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold flex items-center justify-center shadow-lg"><Save className="w-5 h-5 mr-2"/> Şablonu Kaydet</button></div>
         </div>
     );
@@ -815,7 +887,6 @@ function LGSCustomEditorModal({ initialSettings, onClose, showDialog }) {
     );
 }
 
-// --- STUDENT APP BİLEŞENİ ---
 function StudentApp({ user, studentName, grade, curriculum, announcementData, dailyQuestion, generalSettings, showDialog }) {
   const [activeTab, setActiveTab] = useState('home');
   const [data, setData] = useState(null); 
@@ -865,7 +936,6 @@ function StudentApp({ user, studentName, grade, curriculum, announcementData, da
     fireConfetti(); 
   };
 
-  // YENİ EKLENTİ: Öğrenci Kendi Profil Fotoğrafını Yüklüyor
   const handleProfilePicUpload = async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -912,7 +982,6 @@ function StudentApp({ user, studentName, grade, curriculum, announcementData, da
   );
 }
 
-// --- TEACHER APP BİLEŞENİ ---
 function TeacherApp({ user, curriculum, currentAnnouncementData, generalSettings, showDialog }) {
     const [students, setStudents] = useState([]);
     const [search, setSearch] = useState("");
@@ -1228,7 +1297,7 @@ function HomeView({ data, grade, studentName, defaultCurriculum, announcementDat
                     {safeCurriculum.map((item, idx) => {
                         const meta = getSubjectInfo(item);
                         return (
-                            <div key={item.id + idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-indigo-100 hover:bg-indigo-50/30 transition group"><div className="flex items-center gap-3"><div className={`p-2 rounded-lg bg-${meta.color}-100 text-${meta.color}-600 group-hover:scale-110 transition`}>{meta.icon && <meta.icon className="w-5 h-5" />}</div><div><span className="font-bold text-slate-700 text-sm block">{meta.label}</span><span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{meta.type === 'question' ? 'Soru Çözümü' : 'Etkinlik'}</span></div></div><div className="text-right"><span className="font-black text-lg text-slate-800">{item.target}</span><span className="text-xs text-slate-400 ml-1">{meta.type === 'question' ? 'soru' : 'dk'}</span></div></div>
+                            <div key={item.id + idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-indigo-100 hover:bg-indigo-50/30 transition group"><div className="flex items-center gap-3"><div className={`p-2 rounded-lg bg-${meta.color}-100 text-${meta.color}-600 group-hover:scale-110 transition`}>{meta.icon && <meta.icon className="w-5 h-5" />}</div><div><span className="font-bold text-slate-700 text-sm block">{meta.label}</span><span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{meta.type === 'question' ? 'Soru Çözümü' : 'Etkinlik'}</span></div></div><div className="text-right"><span className="font-black text-lg text-slate-800">{item.target}</span><span className="text-xs text-slate-400 ml-1">{meta.type === 'question' ? 'soru' : item.id === 'kelime' ? 'kelime' : 'dk'}</span></div></div>
                         )
                     })}
                 </div>
@@ -1268,7 +1337,7 @@ function DayEditModal({ day, curriculum, initialData, onClose, onSave }) {
                             <div className={`w-5 h-5 rounded border flex items-center justify-center ${form[key] ? 'bg-green-500 border-green-500' : 'bg-white'}`}>{form[key] && <CheckCircle2 className="w-3 h-3 text-white"/>}</div>
                             <div>
                                 <span className="text-sm font-bold text-slate-700 block">{meta.label}</span>
-                                <span className="text-xs text-slate-400">Hedef: {item.target} dk</span>
+                                <span className="text-xs text-slate-400">Hedef: {item.target} {key === 'kelime' ? 'kelime' : 'dk'}</span>
                             </div>
                         </div>
                     );
@@ -1359,7 +1428,7 @@ function LoginScreen({ setRole, studentName, setStudentName, studentGrade, setSt
   );
 }
 
-const App = () => {
+export default function App() {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
   const [studentName, setStudentName] = useState('');
@@ -1373,7 +1442,6 @@ const App = () => {
   const [generalSettings, setGeneralSettings] = useState({ programWeeks: 2, customLGS: null });
   const [dialog, setDialog] = useState(null);
 
-  // YENİ EKLENTİ: Gerçek PWA (Uygulama İndirme) Tetikleyicisi
   const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   useEffect(() => {
@@ -1387,7 +1455,7 @@ const App = () => {
           deferredPrompt.prompt();
           deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
       } else {
-          setShowInstallModal(true); // Cihaz otomatik yüklemeyi desteklemiyorsa eski modal'ı aç (iPhone gibi)
+          setShowInstallModal(true); 
       }
   };
 
@@ -1433,7 +1501,6 @@ const App = () => {
                 <div><h1 className="text-3xl font-bold leading-none spencerian tracking-wide">Mrt Akademi</h1><span className="text-[10px] opacity-80 uppercase tracking-wider block mt-1">V44 Final (Secure)</span></div>
             </div>
             <div className="flex items-center space-x-2">
-                {/* YENİ EKLENTİ: Gerçek PWA tetikleyicisi butona eklendi */}
                 {!role && <button onClick={handleInstallClick} className="flex items-center text-xs bg-indigo-500 hover:bg-indigo-400 px-3 py-1.5 rounded-full"><Download className="w-3 h-3 mr-1" /> İndir</button>}
                 <button onClick={() => setShowGuide(true)} className="p-1.5 bg-indigo-500 rounded-full hover:bg-indigo-400"><HelpCircle className="w-4 h-4 text-white" /></button>
                 {role && <button onClick={handleLogout} className="p-1.5 bg-indigo-700 rounded hover:bg-red-500"><LogOut className="w-4 h-4" /></button>}
@@ -1470,5 +1537,3 @@ const App = () => {
     </div>
   );
 }
-
-export default App;
