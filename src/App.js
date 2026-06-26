@@ -93,6 +93,7 @@ const UiverseStyles = () => (
 );
 
 let firebaseConfig;
+/* global __firebase_config */
 if (typeof __firebase_config !== 'undefined') {
   firebaseConfig = JSON.parse(__firebase_config);
 } else {
