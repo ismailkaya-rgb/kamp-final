@@ -615,6 +615,23 @@ function DailyQuestionCard({ questionData, grade, showDialog }) {
     ); 
 }
 
+function AppGuideModal({ onClose }) { 
+    return (
+        <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4">
+            <div className="bg-white w-full max-w-md h-[80vh] rounded-2xl flex flex-col overflow-hidden">
+                <div className="bg-indigo-600 p-4 text-white flex justify-between items-center"><h3 className="font-bold">Rehber</h3><button onClick={onClose}><X className="w-6 h-6"/></button></div>
+                <div className="overflow-y-auto p-6 space-y-8 bg-slate-50 flex-1">
+                    <GuideSection icon={User} title="Giriş" text="Adını ve sınıfını seçerek başla." />
+                    <GuideSection icon={Calendar} title="Program" text="Günün programını doldur ve kaydet." />
+                    <GuideSection icon={List} title="Serbest Çalışma" text="Listeden ne çalıştığını seç ve süresini gir." />
+                    <GuideSection icon={Gift} title="Şanslı Görev" text="Her gün yeni bir akademik görev!" />
+                    <GuideSection icon={Flame} title="Rozetler" text="Zorlu görevleri tamamla, efsanevi rozetleri kap!" />
+                </div>
+            </div>
+        </div>
+    ); 
+}
+
 function InstallGuideModal({ onClose }) {
     return (
         <div className="fixed inset-0 bg-black/80 z-[60] flex items-end sm:items-center justify-center">
