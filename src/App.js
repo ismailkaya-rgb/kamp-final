@@ -5,15 +5,15 @@ import {
   ChevronDown, X, Share, MoreVertical, Phone, AlertTriangle, 
   RefreshCcw, LockKeyhole, GraduationCap, Lightbulb, Trophy, Flame, 
   Target, Zap, Search, Award, Loader2, Trash2, TrendingUp, Settings, Plus, Save, Activity,
-  History, Edit3, Bell, Check, List, Clock, XCircle, HelpCircle, Info, Gift, Image as ImageIcon, Camera, Palette, FileText, Send, Lock, Crown, Gem, RotateCcw, CalendarDays, MapPin, Globe, Scroll, Heart, Sliders
+  History, Edit3, Bell, Check, List, Clock, XCircle, HelpCircle, Info, Gift, Image as ImageIcon, 
+  Camera, Palette, FileText, Send, Lock, Crown, Gem, RotateCcw, CalendarDays, MapPin, Globe, Scroll, Heart, Sliders,
+  Languages, Hash // YENİ İKONLAR (İngilizce ve Sayısal Değer İçin)
 } from 'lucide-react';
 
 import { initializeApp } from 'firebase/app';
-// GÜVENLİK GÜNCELLEMESİ: Auth kütüphaneleri tam güvenlikli giriş için eklendi.
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot, serverTimestamp, updateDoc, deleteField } from 'firebase/firestore';
 
-// --- UIVERSE CUSTOM STYLES & FONTS ---
 const UiverseStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
@@ -33,13 +33,11 @@ const UiverseStyles = () => (
     .uiverse-checkbox .uiverse-checkmark:after { left: 0.35em; top: 0.20em; width: 0.25em; height: 0.5em; border: solid var(--chk-color, #2196F3); border-width: 0 0.15em 0.15em 0; transform: rotate(-5deg); animation: upAnimate 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
     @keyframes upAnimate { from { transform: translate(-20px, -20px) rotate(-5deg); opacity: 0; } to { transform: translate(0, 0) rotate(-5deg); opacity: 1; } }
 
-    /* Öğrenci Kartı 3D Flip Animasyonu */
     .tc-card { perspective: 1000px; height: 440px; width: 100%; position: relative; }
     .tc-content { width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 600ms cubic-bezier(0.4, 0.2, 0.2, 1); border-radius: 1.5rem; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.15); }
     .tc-card.flipped .tc-content { transform: rotateY(180deg); }
     .tc-front, .tc-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 1.5rem; overflow: hidden; }
     
-    /* Ön Yüz */
     .tc-front { background-color: #0f172a; color: white; display: flex; flex-direction: column; z-index: 2; }
     .tc-front-bg { position: absolute; width: 100%; height: 100%; top:0; left:0; z-index:0; overflow:hidden; pointer-events: none; }
     .tc-circle { width: 140px; height: 140px; border-radius: 50%; background-color: rgba(99, 102, 241, 0.4); position: absolute; filter: blur(35px); animation: tc-floating 4s infinite ease-in-out alternate; }
@@ -47,10 +45,8 @@ const UiverseStyles = () => (
     #tc-right { background-color: rgba(236, 72, 153, 0.3); right: -10%; top: -10%; width: 140px; height: 140px; animation-delay: -1800ms; }
     @keyframes tc-floating { 0% { transform: translateY(0px) scale(1); } 50% { transform: translateY(20px) scale(1.1); } 100% { transform: translateY(0px) scale(1); } }
     
-    /* Arka Yüz */
     .tc-back { background-color: #f8fafc; transform: rotateY(180deg); display: flex; flex-direction: column; border: 1px solid #e2e8f0; z-index: 1; pointer-events: auto; overflow: hidden; }
 
-    /* Hamburger Menü (Öğrenci Kartı Yan Menü Tetikleyicisi) */
     .ham-input { display: none; }
     .ham-toggle { position: relative; width: 24px; height: 24px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4.5px; transition-duration: .4s; margin-right: 10px; }
     .ham-bars { width: 100%; height: 2.5px; background-color: #4f46e5; border-radius: 4px; }
@@ -62,11 +58,9 @@ const UiverseStyles = () => (
     .ham-input:checked + .ham-toggle .ham-bar3 { width: 100%; transform: rotate(-45deg); transition-duration: .4s; }
     .ham-input:checked + .ham-toggle { transition-duration: .4s; transform: rotate(180deg); }
 
-    /* Yan Açılır Menü Panel */
     .side-panel { position: absolute; top: 0; left: 0; width: 240px; max-width: 85%; height: 100%; background-color: #ffffff; border-right: 1px solid #e2e8f0; z-index: 30; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 4px 0 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
     .side-panel.open { transform: translateX(0); }
 
-    /* Öğrenci Kartı İçi Modern Aksiyon Menüsü */
     .action-menu { width: 100%; display: flex; flex-direction: column; gap: 4px; padding: 4px 0; }
     .action-menu .separator { border-top: 1px solid #f1f5f9; margin: 6px 10px; }
     .action-menu .list { list-style-type: none; display: flex; flex-direction: column; gap: 4px; padding: 0px 8px; margin: 0; }
@@ -92,7 +86,6 @@ const UiverseStyles = () => (
     .action-menu .list .element.default:hover { background-color: #f1f5f9; color: #1e293b; }
     .action-menu .list .element.default:hover svg { stroke: #1e293b; }
 
-    /* Dalga Animasyonlu Input Tasarımı */
     .wave-group { position: relative; width: 100%; margin-top: 16px; margin-bottom: 8px; }
     .wave-group input { background-color: transparent; border: 0; border-bottom: 2px solid #cbd5e1; display: block; width: 100%; padding: 10px 0; font-size: 15px; color: #1e293b; font-weight: 600; outline: none; transition: border-color 0.3s; }
     .wave-group input:focus, .wave-group input:valid { border-bottom-color: #4f46e5; }
@@ -107,9 +100,7 @@ const UiverseStyles = () => (
   `}</style>
 );
 
-// --- 1. FIREBASE INIT (.env HATASI GİDERİLDİ, SİTE KISITLAMASI OLDUĞU İÇİN GÜVENLİ) ---
 const firebaseConfig = {
-  // DİKKAT: YENİ ALDIĞIN UZUN API KEY'İ AŞAĞIDAKİ YERE YAPIŞTIR
   apiKey: "AIzaSyAymTlaA8CgqpfOC1vhs-bO6240ZlBGlrQ", 
   authDomain: "kamp-takip-sistemi.firebaseapp.com",
   projectId: "kamp-takip-sistemi",
@@ -122,13 +113,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// --- 2. AYARLAR VE SABİTLER ---
 const APP_ID = "kamp-takip-yonetici-v3"; 
-// GÜVENLİK: Koddaki sabit öğretmen şifresi (TEACHER_PASS) tamamen silindi! Öğretmen girişi artık tamamen veritabanından güvenli yapılıyor.
-
 const LGS_DATE_2026 = new Date('2026-06-07T09:30:00');
 
-// --- LGS MÜFREDAT TAKVİMİ (REFERANS HAVUZU) ---
 const LGS_CURRICULUM_CALENDAR = [
     { id: 0, title: '1. Dönem Başlangıç', mat: 'Çarpanlar ve Katlar', fen: 'Mevsimler ve İklim', tr: 'Fiilimsiler', ink: 'Bir Kahraman Doğuyor', din: 'Kader İnancı', ing: 'Friendship' },
     { id: 1, title: '1. Dönem - Ekim Ortası', mat: 'Üslü İfadeler', fen: 'DNA ve Genetik Kod', tr: 'Cümlenin Ögeleri', ink: 'Milli Uyanış', din: 'Zekat ve Sadaka', ing: 'Teen Life' },
@@ -161,7 +148,7 @@ const DEFAULT_CURRICULUM = {
   "5": [{ id: 'mat', target: 30 }, { id: 'tr', target: 30 }, { id: 'fen', target: 20 }, { id: 'sos', target: 20 }, { id: 'serbestCalisma', target: 30 }],
   "6": [{ id: 'mat', target: 40 }, { id: 'tr', target: 40 }, { id: 'fen', target: 30 }, { id: 'serbestCalisma', target: 30 }],
   "7": [{ id: 'mat', target: 50 }, { id: 'tr', target: 50 }, { id: 'fen', target: 30 }, { id: 'serbestCalisma', target: 30 }],
-  "8": [{ id: 'mat', target: 60 }, { id: 'tr', target: 60 }, { id: 'fen', target: 40 }, { id: 'inkilap', target: 25 }, { id: 'ing', target: 20 }, { id: 'din', target: 15 }, { id: 'serbestCalisma', target: 30 }]
+  "8": [{ id: 'mat', target: 60 }, { id: 'tr', target: 60 }, { id: 'fen', target: 40 }, { id: 'inkilap', target: 25 }, { id: 'ing', target: 20 }, { id: 'din', target: 15 }, { id: 'serbestCalisma', target: 30 }, { id: 'ingKelime', target: 10 }]
 };
 
 const SUBJECT_METADATA = {
@@ -173,6 +160,8 @@ const SUBJECT_METADATA = {
   inkilap: { label: "İnkılap Tarihi", icon: Scroll, color: "amber", type: "question" },
   ing: { label: "İngilizce", icon: Globe, color: "purple", type: "question" },
   din: { label: "Din Kültürü", icon: Heart, color: "teal", type: "question" },
+  // YENİ EKLENEN KELİME EZBERLEME TÜRÜ (Sayaç Tipi)
+  ingKelime: { label: "İngilizce Kelime Ezber", icon: Languages, color: "fuchsia", type: "counter" },
   kitap: { label: "Kitap Okuma", icon: BookOpen, color: "pink", type: "duration" },
   spor: { label: "Spor/Egzersiz", icon: Trophy, color: "cyan", type: "duration" },
   kodlama: { label: "Kodlama", icon: Zap, color: "violet", type: "duration" },
@@ -184,10 +173,9 @@ const ADVICE_POOL = {
   math: ["İşlemleri yazarak yap. ✍️"], turkish: ["Soru kökünü iyi oku. 👁️"], science: ["Mantığını kavra. 🧪"], general: ["Harikasın! 💧"]
 };
 
-// --- YARDIMCI FONKSİYONLAR ---
 const normalizeString = (str) => {
     const map = { 'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u', 'Ç': 'C', 'Ğ': 'G', 'İ': 'I', 'Ö': 'O', 'Ş': 'S', 'Ü': 'U' };
-    return str.replace(/[çğıöşüÇĞİÖŞÜ]/g, match => map[match] || match).trim().toLowerCase().replace(/\s+/g, ''); // Boşlukları ve Türkçe karakterleri siler
+    return str.replace(/[çğıöşüÇĞİÖŞÜ]/g, match => map[match] || match).trim().toLowerCase().replace(/\s+/g, '');
 };
 
 const generateStudentId = (name, grade) => `std_${normalizeString(name)}_${grade}`;
@@ -198,6 +186,7 @@ const countTotalSubject = (days, subjectKey) => {
     Object.values(days || {}).forEach(d => {
         if(d[subjectKey + 'True']) total += parseInt(d[subjectKey + 'True'] || 0);
         if(d[subjectKey + 'Duration']) total += parseInt(d[subjectKey + 'Duration'] || 0);
+        if(d[subjectKey + 'Count']) total += parseInt(d[subjectKey + 'Count'] || 0);
         if(d[subjectKey] === true) total += 1;
     });
     return total;
@@ -301,19 +290,20 @@ const generateReportCard = (student, curriculum, customMessage = null) => {
     ctx.font = 'italic 20px Arial';
     ctx.fillText(`Tarih: ${new Date().toLocaleDateString('tr-TR')}`, W / 2, 200);
 
-    let totalCorrect = 0, totalWrong = 0, totalDuration = 0, totalBook = 0;
+    let totalCorrect = 0, totalWrong = 0, totalDuration = 0, totalBook = 0, totalWord = 0;
     const dailyStats = [];
 
     const sortedDays = Object.keys(student.days || {}).sort((a, b) => parseInt(a) - parseInt(b));
 
     sortedDays.forEach(day => {
         const d = student.days[day];
-        let dayCorrect = 0, dayWrong = 0, dayDuration = 0, dayBook = 0;
+        let dayCorrect = 0, dayWrong = 0, dayDuration = 0, dayBook = 0, dayWord = 0;
 
         Object.keys(d).forEach(k => {
             if (k.endsWith('True')) dayCorrect += parseInt(d[k] || 0);
             if (k.endsWith('False')) dayWrong += parseInt(d[k] || 0);
             if (k.endsWith('Duration')) dayDuration += parseInt(d[k] || 0);
+            if (k.endsWith('Count')) dayWord += parseInt(d[k] || 0);
             if (k === 'kitap' && typeof d[k] === 'number') dayBook += d[k]; 
             if (k === 'kitap' && d[k] === true) dayBook += 1; 
         });
@@ -322,25 +312,27 @@ const generateReportCard = (student, curriculum, customMessage = null) => {
         totalWrong += dayWrong;
         totalDuration += dayDuration;
         totalBook += dayBook;
+        totalWord += dayWord;
 
-        dailyStats.push({ day, dayCorrect, dayWrong, dayDuration, dayBook });
+        dailyStats.push({ day, dayCorrect, dayWrong, dayDuration, dayBook, dayWord });
     });
 
     const drawSummaryBox = (x, y, label, val, color) => {
         ctx.fillStyle = color;
-        roundRect(ctx, x, y, 200, 100, 10);
+        roundRect(ctx, x, y, 170, 90, 10);
         ctx.fill();
         ctx.fillStyle = 'white';
-        ctx.font = 'bold 40px Arial';
-        ctx.fillText(String(val), x + 100, y + 60);
-        ctx.font = '16px Arial';
-        ctx.fillText(label, x + 100, y + 85);
+        ctx.font = 'bold 32px Arial';
+        ctx.fillText(String(val), x + 85, y + 45);
+        ctx.font = '14px Arial';
+        ctx.fillText(label, x + 85, y + 70);
     };
 
-    drawSummaryBox(80, 250, 'Toplam Doğru', totalCorrect, '#22c55e');
-    drawSummaryBox(300, 250, 'Toplam Yanlış', totalWrong, '#ef4444');
-    drawSummaryBox(520, 250, 'Konu Çalışma (Dk)', totalDuration, '#3b82f6');
-    drawSummaryBox(740, 250, 'Kitap Okuma', totalBook, '#eab308');
+    drawSummaryBox(40, 250, 'Toplam Doğru', totalCorrect, '#22c55e');
+    drawSummaryBox(230, 250, 'Toplam Yanlış', totalWrong, '#ef4444');
+    drawSummaryBox(420, 250, 'Çalışma (Dk)', totalDuration, '#3b82f6');
+    drawSummaryBox(610, 250, 'Kitap Okuma', totalBook, '#eab308');
+    drawSummaryBox(800, 250, 'Kelime Ezber', totalWord, '#d946ef');
 
     const displayMessage = customMessage !== null ? customMessage : (student.teacherMessage || "");
 
@@ -348,14 +340,14 @@ const generateReportCard = (student, curriculum, customMessage = null) => {
         ctx.fillStyle = '#fff7ed'; 
         ctx.strokeStyle = '#fdba74'; 
         ctx.lineWidth = 2;
-        roundRect(ctx, 80, 380, 860, 100, 10);
+        roundRect(ctx, 40, 380, 930, 100, 10);
         ctx.fill();
         ctx.stroke();
         
         ctx.fillStyle = '#9a3412'; 
         ctx.font = 'bold 20px Arial';
         ctx.textAlign = 'left';
-        ctx.fillText('Öğretmen Mesajı:', 100, 415);
+        ctx.fillText('Öğretmen Mesajı:', 60, 415);
         
         ctx.fillStyle = '#431407'; 
         ctx.font = 'italic 24px Arial';
@@ -364,46 +356,48 @@ const generateReportCard = (student, curriculum, customMessage = null) => {
         let ly = 445;
         words.forEach(word => {
             if (ctx.measureText(line + word).width > 800) {
-                ctx.fillText(line, 100, ly);
+                ctx.fillText(line, 60, ly);
                 line = word + ' ';
                 ly += 30;
             } else {
                 line += word + ' ';
             }
         });
-        ctx.fillText(line, 100, ly);
+        ctx.fillText(line, 60, ly);
     }
 
     let ty = 530;
     ctx.textAlign = 'left';
     ctx.fillStyle = '#1e293b';
     ctx.font = 'bold 24px Arial';
-    ctx.fillText('Günlük Çalışma Detayları', 80, ty);
+    ctx.fillText('Günlük Çalışma Detayları', 40, ty);
     ty += 30;
 
     ctx.fillStyle = '#e2e8f0'; 
-    ctx.fillRect(80, ty, 860, 40);
+    ctx.fillRect(40, ty, 930, 40);
     ctx.fillStyle = '#0f172a'; 
-    ctx.font = 'bold 18px Arial';
-    ctx.fillText('Gün', 100, ty + 27);
-    ctx.fillText('Doğru', 250, ty + 27);
-    ctx.fillText('Yanlış', 400, ty + 27);
-    ctx.fillText('Çalışma (Dk)', 550, ty + 27);
-    ctx.fillText('Kitap', 750, ty + 27);
+    ctx.font = 'bold 16px Arial';
+    ctx.fillText('Gün', 60, ty + 27);
+    ctx.fillText('Doğru', 200, ty + 27);
+    ctx.fillText('Yanlış', 350, ty + 27);
+    ctx.fillText('Çalışma (Dk)', 500, ty + 27);
+    ctx.fillText('Kitap', 700, ty + 27);
+    ctx.fillText('Ezber', 850, ty + 27);
     ty += 40;
 
-    ctx.font = '18px Arial';
+    ctx.font = '16px Arial';
     dailyStats.forEach((stat, idx) => {
         if (ty > 1000) return; 
         ctx.fillStyle = idx % 2 === 0 ? '#f8fafc' : 'white';
-        ctx.fillRect(80, ty, 860, 35);
+        ctx.fillRect(40, ty, 930, 35);
         
         ctx.fillStyle = '#334155';
-        ctx.fillText(`${stat.day}. Gün`, 100, ty + 24);
-        ctx.fillStyle = '#16a34a'; ctx.fillText(String(stat.dayCorrect), 250, ty + 24);
-        ctx.fillStyle = '#dc2626'; ctx.fillText(String(stat.dayWrong), 400, ty + 24);
-        ctx.fillStyle = '#2563eb'; ctx.fillText(String(stat.dayDuration), 550, ty + 24);
-        ctx.fillStyle = '#ca8a04'; ctx.fillText(String(stat.dayBook), 750, ty + 24);
+        ctx.fillText(`${stat.day}. Gün`, 60, ty + 24);
+        ctx.fillStyle = '#16a34a'; ctx.fillText(String(stat.dayCorrect), 200, ty + 24);
+        ctx.fillStyle = '#dc2626'; ctx.fillText(String(stat.dayWrong), 350, ty + 24);
+        ctx.fillStyle = '#2563eb'; ctx.fillText(String(stat.dayDuration), 500, ty + 24);
+        ctx.fillStyle = '#ca8a04'; ctx.fillText(String(stat.dayBook), 700, ty + 24);
+        ctx.fillStyle = '#d946ef'; ctx.fillText(String(stat.dayWord), 850, ty + 24);
         
         ty += 35;
     });
@@ -413,10 +407,10 @@ const generateReportCard = (student, curriculum, customMessage = null) => {
         ty = Math.max(ty + 40, 1100); 
         ctx.fillStyle = '#1e293b';
         ctx.font = 'bold 24px Arial';
-        ctx.fillText('Kazanılan Rozetler', 80, ty);
+        ctx.fillText('Kazanılan Rozetler', 40, ty);
         ty += 40;
 
-        let bx = 80;
+        let bx = 40;
         earnedBadges.forEach((badge, i) => {
             ctx.fillStyle = '#f1f5f9';
             roundRect(ctx, bx, ty, 100, 120, 10);
@@ -459,7 +453,7 @@ const generateReportCard = (student, curriculum, customMessage = null) => {
             ctx.fillText(dLine, bx + 50, dY);
 
             bx += 110;
-            if (bx > 880) { bx = 80; ty += 140; }
+            if (bx > 880) { bx = 40; ty += 140; }
         });
     }
 
@@ -475,9 +469,6 @@ const generateReportCard = (student, curriculum, customMessage = null) => {
     link.click();
 };
 
-// --- BİLEŞENLER ---
-
-// Ortak Dalga Animasyonlu Input Bileşeni
 const WaveInput = ({ value, onChange, label, icon: Icon, type = "text", rightElement }) => {
     return (
         <div className={`wave-group ${Icon ? 'has-icon' : ''}`}>
@@ -500,7 +491,6 @@ const WaveInput = ({ value, onChange, label, icon: Icon, type = "text", rightEle
     );
 };
 
-
 const GuideSection = ({icon: Icon, title, text}) => (
     <div className="space-y-2 mb-4">
         <div className="flex items-center gap-2 text-indigo-600 font-bold border-b pb-1 border-indigo-200"><Icon className="w-5 h-5"/> {title}</div>
@@ -515,6 +505,7 @@ const NavButton = ({ icon: Icon, label, isActive, onClick }) => (
     </button>
 );
 
+// YENİLENEN LGS SAYACI (ÇOK DAHA MODERN VE CANLI)
 function LGSCountdown({ grade }) { 
     const [timeLeft, setTimeLeft] = useState({}); 
     useEffect(() => { 
@@ -523,34 +514,54 @@ function LGSCountdown({ grade }) {
             const targetDate = LGS_DATE_2026; 
             const diff = targetDate - now; 
             if (diff > 0) { 
-                setTimeLeft({ gün: Math.floor(diff/(1000*60*60*24)), saat: Math.floor((diff/(1000*60*60))%24), dk: Math.floor((diff/1000/60)%60), sn: Math.floor((diff/1000)%60) });
+                setTimeLeft({ 
+                    gün: Math.floor(diff/(1000*60*60*24)), 
+                    saat: Math.floor((diff/(1000*60*60))%24), 
+                    dk: Math.floor((diff/1000/60)%60), 
+                    sn: Math.floor((diff/1000)%60) 
+                });
             } 
         }, 1000); 
         return () => clearInterval(timer); 
     }, [grade]); 
     
     return (
-        <div className="bg-slate-900 rounded-2xl p-5 mb-6 shadow-xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full blur-[60px] opacity-20 group-hover:opacity-30 transition"></div>
-            <div className="relative z-10 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-500/30">
-                        <Clock className="w-6 h-6 text-white" />
+        <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 mb-6 shadow-[0_10px_30px_-10px_rgba(79,70,229,0.5)] border border-indigo-500/20 group">
+            {/* Arka plan ışık efektleri */}
+            <div className="absolute -top-10 -left-10 w-32 h-32 bg-indigo-500 rounded-full blur-[80px] opacity-40 group-hover:opacity-60 transition-opacity duration-700"></div>
+            <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-purple-500 rounded-full blur-[80px] opacity-40 group-hover:opacity-60 transition-opacity duration-700"></div>
+
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <div className="bg-indigo-500/20 p-3 rounded-2xl border border-indigo-400/30 backdrop-blur-md shadow-inner">
+                        <Clock className="w-8 h-8 text-indigo-300 animate-pulse" />
                     </div>
                     <div>
-                        <h4 className="text-white font-bold text-lg leading-none">LGS 2026</h4>
-                        <span className="text-indigo-300 text-xs font-medium">Büyük Sınava Kalan</span>
+                        <h4 className="text-white font-black text-xl tracking-tight">LGS 2026 Sayacı</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className="relative flex h-2.5 w-2.5">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                            </span>
+                            <span className="text-indigo-200 text-xs font-medium uppercase tracking-wider">Büyük Gün Yaklaşıyor</span>
+                        </div>
                     </div>
                 </div>
-                <div className="flex gap-2 text-center">
-                    <div className="bg-slate-800 p-2 rounded-lg min-w-[50px] border border-slate-700">
-                        <div className="text-xl font-bold text-white leading-none">{timeLeft.gün || 0}</div>
-                        <div className="text-[10px] text-slate-400 mt-1 uppercase">Gün</div>
-                    </div>
-                    <div className="bg-slate-800 p-2 rounded-lg min-w-[50px] border border-slate-700 hidden sm:block">
-                        <div className="text-xl font-bold text-white leading-none">{timeLeft.saat || 0}</div>
-                        <div className="text-[10px] text-slate-400 mt-1 uppercase">Saat</div>
-                    </div>
+
+                <div className="flex gap-2 sm:gap-3 text-center">
+                    {[
+                        { label: 'GÜN', value: timeLeft.gün },
+                        { label: 'SAAT', value: timeLeft.saat },
+                        { label: 'DAKİKA', value: timeLeft.dk, hiddenSm: false },
+                        { label: 'SANİYE', value: timeLeft.sn, hiddenSm: true }
+                    ].map((time, idx) => (
+                        <div key={idx} className={`bg-white/5 backdrop-blur-md px-3 py-2.5 sm:px-4 sm:py-3 rounded-2xl border border-white/10 flex flex-col items-center justify-center min-w-[60px] sm:min-w-[70px] shadow-lg ${time.hiddenSm ? 'hidden sm:flex' : 'flex'}`}>
+                            <div className="text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tighter drop-shadow-md">
+                                {time.value !== undefined ? String(time.value).padStart(2, '0') : '--'}
+                            </div>
+                            <div className="text-[9px] sm:text-[10px] text-indigo-300 font-bold mt-1 tracking-widest">{time.label}</div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
@@ -600,23 +611,6 @@ function DailyQuestionCard({ questionData, grade, showDialog }) {
                     <button onClick={handleSubmit} className="w-full bg-green-500 text-white py-2 rounded-lg font-bold text-sm mt-2">Gönder</button>
                 </div>
             ) : <div className="text-center font-bold text-sm p-2 bg-green-100 text-green-700 rounded">{result==='correct'?'Tebrikler Doğru!':'Yanıtın Kaydedildi'}</div>}
-        </div>
-    ); 
-}
-
-function AppGuideModal({ onClose }) { 
-    return (
-        <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4">
-            <div className="bg-white w-full max-w-md h-[80vh] rounded-2xl flex flex-col overflow-hidden">
-                <div className="bg-indigo-600 p-4 text-white flex justify-between items-center"><h3 className="font-bold">Rehber</h3><button onClick={onClose}><X className="w-6 h-6"/></button></div>
-                <div className="overflow-y-auto p-6 space-y-8 bg-slate-50 flex-1">
-                    <GuideSection icon={User} title="Giriş" text="Adını ve sınıfını seçerek başla." />
-                    <GuideSection icon={Calendar} title="Program" text="Günün programını doldur ve kaydet." />
-                    <GuideSection icon={List} title="Serbest Çalışma" text="Listeden ne çalıştığını seç ve süresini gir." />
-                    <GuideSection icon={Gift} title="Şanslı Görev" text="Her gün yeni bir akademik görev!" />
-                    <GuideSection icon={Flame} title="Rozetler" text="Zorlu görevleri tamamla, efsanevi rozetleri kap!" />
-                </div>
-            </div>
         </div>
     ); 
 }
@@ -747,7 +741,7 @@ function StudentProgramEditorModal({ student, globalCurriculum, totalDays, onClo
                                         {meta.icon && <div className={`p-2 bg-${meta.color}-50 rounded-lg`}><meta.icon className={`w-4 h-4 text-${meta.color}-600`}/></div>}
                                         <div>
                                             <div className="font-bold text-slate-700 text-sm">{meta.label}</div>
-                                            <div className="text-[10px] text-slate-500">Hedef: {item.target} {meta.type === 'question' ? 'soru' : 'dk'}</div>
+                                            <div className="text-[10px] text-slate-500">Hedef: {item.target} {meta.type === 'question' ? 'soru' : meta.type === 'counter' ? 'kelime' : 'dk'}</div>
                                         </div>
                                     </div>
                                     <button onClick={() => handleRemoveItem(idx)} className="text-red-400 hover:text-red-600 p-2 bg-red-50 rounded-lg transition"><Trash2 className="w-4 h-4"/></button>
@@ -827,7 +821,7 @@ function ProgramEditorModal({ curriculum, onClose, showDialog }) {
                     <button onClick={handleAddItem} className="w-full bg-green-500 text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center"><Plus className="w-4 h-4 mr-2"/> Listeye Ekle</button>
                 </div>
             </div>
-            <div className="space-y-2 mb-20">{safeArray(list).map((item, idx) => { const meta = getSubjectInfo(item); return ( <div key={item.id + idx} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center"><div className="flex items-center gap-3">{meta.icon && <div className={`p-2 bg-${meta.color}-50 rounded-lg`}><meta.icon className={`w-5 h-5 text-${meta.color}-600`}/></div>}<div><div className="font-bold text-slate-700 text-sm">{meta.label}</div><div className="text-xs text-slate-500">Hedef: {item.target} {meta.type === 'question' ? 'soru' : 'dk'}</div></div></div><button onClick={() => handleRemoveItem(idx)} className="text-red-400 hover:text-red-600 p-2"><Trash2 className="w-4 h-4"/></button></div> ) })}</div>
+            <div className="space-y-2 mb-20">{safeArray(list).map((item, idx) => { const meta = getSubjectInfo(item); return ( <div key={item.id + idx} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center"><div className="flex items-center gap-3">{meta.icon && <div className={`p-2 bg-${meta.color}-50 rounded-lg`}><meta.icon className={`w-5 h-5 text-${meta.color}-600`}/></div>}<div><div className="font-bold text-slate-700 text-sm">{meta.label}</div><div className="text-xs text-slate-500">Hedef: {item.target} {meta.type === 'question' ? 'soru' : meta.type === 'counter' ? 'kelime' : 'dk'}</div></div></div><button onClick={() => handleRemoveItem(idx)} className="text-red-400 hover:text-red-600 p-2"><Trash2 className="w-4 h-4"/></button></div> ) })}</div>
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t flex gap-2">
                 <button onClick={handleSave} className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold flex items-center justify-center shadow-lg"><Save className="w-5 h-5 mr-2"/> Şablonu Kaydet</button>
             </div>
@@ -940,7 +934,6 @@ function LGSCustomEditorModal({ initialSettings, onClose, showDialog }) {
     );
 }
 
-// --- STUDENT APP BİLEŞENİ ---
 function StudentApp({ user, studentName, grade, curriculum, announcementData, dailyQuestion, generalSettings, showDialog }) {
   const [activeTab, setActiveTab] = useState('home');
   const [data, setData] = useState(null); 
@@ -1045,7 +1038,6 @@ function StudentApp({ user, studentName, grade, curriculum, announcementData, da
   );
 }
 
-// --- TEACHER APP BİLEŞENİ ---
 function TeacherApp({ user, curriculum, currentAnnouncementData, generalSettings, showDialog }) {
     const [students, setStudents] = useState([]);
     const [search, setSearch] = useState("");
@@ -1253,7 +1245,6 @@ function StudentDetailRow({ student, onDelete, onReset, curriculum, totalDays, s
   return (
     <div className={`tc-card ${isFlipped ? 'flipped' : ''}`}>
       <div className="tc-content">
-        {/* ÖN YÜZ */}
         <div className="tc-front p-6">
             <div className="tc-front-bg">
                 <div className="tc-circle"></div>
@@ -1294,12 +1285,9 @@ function StudentDetailRow({ student, onDelete, onReset, curriculum, totalDays, s
             </div>
         </div>
 
-        {/* ARKA YÜZ */}
         <div className="tc-back">
-            {/* Header */}
             <div className="bg-white p-4 flex justify-between items-center border-b border-slate-200 shrink-0 shadow-sm relative z-40">
                 <div className="font-bold text-slate-800 text-sm flex items-center">
-                    {/* Hamburger Menü (User İkonu Yerine) */}
                     <input type="checkbox" id={`ham-${student.id}`} className="ham-input" checked={isMenuOpen} onChange={(e) => setIsMenuOpen(e.target.checked)} />
                     <label htmlFor={`ham-${student.id}`} className="ham-toggle">
                         <div className="ham-bars ham-bar1"></div>
@@ -1314,13 +1302,10 @@ function StudentDetailRow({ student, onDelete, onReset, curriculum, totalDays, s
             </div>
 
             <div className="relative flex-1 min-h-0 flex flex-col bg-slate-50 overflow-hidden">
-                
-                {/* Arka Plan Karartması (Menü Açıkken) */}
                 {isMenuOpen && (
                     <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-[1px] z-20 transition-opacity" onClick={() => setIsMenuOpen(false)} />
                 )}
 
-                {/* Yandan Açılan Kaydırmalı Menü (UIVERSE) */}
                 <div className={`side-panel ${isMenuOpen ? 'open' : ''}`}>
                     <div className="p-2 flex-1 overflow-y-auto">
                         <div className="action-menu">
@@ -1356,7 +1341,6 @@ function StudentDetailRow({ student, onDelete, onReset, curriculum, totalDays, s
                     </div>
                 </div>
 
-                {/* Geçmiş Veriler (Artık tüm alanı kaplıyor) */}
                 <div className="overflow-y-auto p-4 flex-1 space-y-4 text-sm relative">
                     {hasStudentMessage && (
                         <div className="bg-white p-3 rounded-xl border border-blue-200 flex gap-2 shadow-sm shrink-0">
@@ -1402,6 +1386,10 @@ function StudentDetailRow({ student, onDelete, onReset, curriculum, totalDays, s
                                                 else if (meta.type === 'selection') {
                                                     const selection = dayData[key]; const duration = dayData[key + 'Duration'];
                                                     if (selection) return <div key={key + idx} className="flex items-start text-slate-700 leading-tight"><CheckCircle2 className="w-3.5 h-3.5 text-green-500 mr-1.5 shrink-0 mt-px"/> <span><span className="font-semibold">{meta.label}:</span> {selection} ({duration || 30}dk)</span></div>
+                                                }
+                                                else if (meta.type === 'counter') {
+                                                    const count = dayData[key + 'Count'];
+                                                    if (count) return <div key={key + idx} className="flex items-start text-slate-700 leading-tight"><CheckCircle2 className="w-3.5 h-3.5 text-green-500 mr-1.5 shrink-0 mt-px"/> <span><span className="font-semibold">{meta.label}:</span> {count} kelime</span></div>
                                                 }
                                                 else if (meta.type === 'duration') {
                                                     if (dayData[key] === true) return <div key={key + idx} className="flex items-start text-slate-700 leading-tight"><CheckCircle2 className="w-3.5 h-3.5 text-green-500 mr-1.5 shrink-0 mt-px"/> <span><span className="font-semibold">{meta.label}:</span> Tamamlandı</span></div>
@@ -1717,12 +1705,16 @@ function HomeView({ data, grade, studentName, defaultCurriculum, announcementDat
                                     </div>
                                     <div>
                                         <span className="font-bold text-slate-700 text-sm block">{meta.label}</span>
-                                        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{meta.type === 'question' ? 'Soru Çözümü' : 'Etkinlik'}</span>
+                                        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
+                                            {meta.type === 'question' ? 'Soru Çözümü' : meta.type === 'counter' ? 'Ezber' : 'Etkinlik'}
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="text-right">
                                      <span className="font-black text-lg text-slate-800">{item.target}</span>
-                                     <span className="text-xs text-slate-400 ml-1">{meta.type === 'question' ? 'soru' : 'dk'}</span>
+                                     <span className="text-xs text-slate-400 ml-1">
+                                         {meta.type === 'question' ? 'soru' : meta.type === 'counter' ? 'kelime' : 'dk'}
+                                     </span>
                                 </div>
                             </div>
                         )
@@ -1769,6 +1761,26 @@ function DayEditModal({ day, curriculum, initialData, onClose, onSave }) {
                         </div>
                     );
                 }
+                // YENİ EKLENEN SAYAÇ TİPİ KONTROLÜ (Kelime Ezberleme gibi)
+                if (meta.type === 'counter') {
+                    return (
+                        <div key={key + idx} className={`p-3 rounded-xl border bg-${meta.color}-50 border-${meta.color}-100`}>
+                            <div className="flex justify-between items-center mb-2">
+                                <div className={`flex items-center font-bold text-${meta.color}-800 text-xs`}>
+                                    <meta.icon className="w-3 h-3 mr-1" /> {meta.label}
+                                </div>
+                                <span className="text-[10px] bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-500 font-bold">
+                                    Hedef: {item.target} kelime
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                                <Hash className={`w-4 h-4 text-${meta.color}-400`} />
+                                <input type="number" placeholder="Kaç kelime ezberledin?" className="flex-1 p-2 rounded-lg border border-white shadow-sm text-sm font-bold outline-none focus:ring-2" value={form[key+'Count']||''} onChange={e=>handleChange(key+'Count',e.target.value)} />
+                            </div>
+                        </div>
+                    );
+                }
+                
                 return (
                     <div key={key + idx} className={`p-3 rounded-xl border bg-${meta.color}-50 border-${meta.color}-100`}>
                         <div className="flex justify-between items-center mb-2"><div className={`flex items-center font-bold text-${meta.color}-800 text-xs`}><meta.icon className="w-3 h-3 mr-1" /> {meta.label}</div><span className="text-[10px] bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-500 font-bold">Hedef: {item.target}</span></div>
@@ -1783,7 +1795,6 @@ function DayEditModal({ day, curriculum, initialData, onClose, onSave }) {
   );
 }
 
-// LOGO BİLEŞENİ
 function AppLogo({ className, fallbackClassName }) {
     const [imgFailed, setImgFailed] = useState(false);
     
@@ -1816,26 +1827,21 @@ function LoginScreen({ setRole, studentName, setStudentName, studentGrade, setSt
   const [pass, setPass] = useState('');
   const [showPassword, setShowPassword] = useState(false); 
   
-  // GÜVENLİK GÜNCELLEMESİ: Öğretmen e-postası. (Firebase Konsolundan Authentication'da bu maili ve belirlediğiniz şifreyi oluşturmalısınız!)
   const TEACHER_EMAIL = "admin@mrtakademi.com";
 
   const handleLogin = async (role) => {
     if (role === 'student') { 
         if (!studentName.trim() || !studentGrade) return showDialog({type:'alert', message:'Lütfen bilgileri doldur.'});
         
-        // İsmi temizle ve sınıf ile birleştirip sistemin anlayacağı sahte bir e-posta oluştur
         const normalizedName = normalizeString(studentName);
         const fakeEmail = `${normalizedName}_${studentGrade}@ogrenci.mrtakademi.com`;
-        const fakePassword = `kamp_std_${normalizedName}_${studentGrade}_2026`; // Öğrenci için standart sabit şifre
+        const fakePassword = `kamp_std_${normalizedName}_${studentGrade}_2026`; 
 
         try {
-            // Önce giriş yapmayı dener
             await signInWithEmailAndPassword(auth, fakeEmail, fakePassword);
         } catch (error) {
-            // Eğer kullanıcı yoksa, arka planda otomatik hesap oluşturur
             try {
                 const userCred = await createUserWithEmailAndPassword(auth, fakeEmail, fakePassword);
-                // Öğrencinin adını ve sınıfını Firebase profiline kaydeder
                 await updateProfile(userCred.user, { displayName: `${studentName.trim()}|${studentGrade}` });
             } catch (err) {
                 console.error(err);
@@ -1846,7 +1852,6 @@ function LoginScreen({ setRole, studentName, setStudentName, studentGrade, setSt
     else { 
         if (!pass) return showDialog({type:'alert', message:'Şifre girmelisiniz.'});
         try {
-            // Sadece şifre ile Firebase'den doğrulama yapılır. Şifre frontend kodunda ASLA yer almaz.
             await signInWithEmailAndPassword(auth, TEACHER_EMAIL, pass);
         } catch (error) {
             showDialog({type:'alert', message:'Yetkisiz giriş! Şifre hatalı.'});
@@ -1911,6 +1916,23 @@ const App = () => {
   const [generalSettings, setGeneralSettings] = useState({ programWeeks: 2, customLGS: null });
   const [dialog, setDialog] = useState(null);
 
+  /* GÜVENLİK VE STİL FALLBACK EKLENTİSİ */
+  useEffect(() => {
+    const checkTailwind = () => {
+        const hasTailwind = Array.from(document.styleSheets).some(sheet => 
+            sheet.href?.includes('tailwind') || 
+            Array.from(sheet.cssRules || []).some(rule => rule.cssText.includes('tw-'))
+        );
+        if (!hasTailwind && !document.getElementById('tailwind-cdn-fallback')) {
+            const script = document.createElement('script');
+            script.id = 'tailwind-cdn-fallback';
+            script.src = 'https://cdn.tailwindcss.com';
+            document.head.appendChild(script);
+        }
+    };
+    try { checkTailwind(); } catch(e){}
+  }, []);
+
   useEffect(() => {
     let unsubscribe;
     const initAuth = async () => {
@@ -1918,7 +1940,6 @@ const App = () => {
             await setPersistence(auth, browserLocalPersistence);
         } catch (e) {}
         
-        // GÜVENLİK GÜNCELLEMESİ: Rol kontrolü artık güvenli bir şekilde sunucudan (E-postadan) alınıyor
         unsubscribe = onAuthStateChanged(auth, async (u) => { 
             if (u) {
                 setUser(u); 
@@ -1926,7 +1947,6 @@ const App = () => {
                     setRole('teacher');
                 } else {
                     setRole('student');
-                    // Firebase profiline kaydettiğimiz isim ve sınıfı çekiyoruz
                     if (u.displayName) {
                         const parts = u.displayName.split('|');
                         if (parts.length === 2) {
